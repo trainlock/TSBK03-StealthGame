@@ -1,0 +1,2 @@
+/Users/linneabergman/Documents/Skolrelaterat/Kurser/TSBK03_Avancerade_Tekniker_för_Dataspel/GameAI/obj/Debug/Assembly-CSharp.csprojResolveAssemblyReference.cache
+/Users/linneabergman/Documents/Skolrelaterat/Kurser/TSBK03_Avancerade_Tekniker_för_Dataspel/GameAI/obj/Debug/Assembly-CSharp.csproj.CoreCompileInputs.cache

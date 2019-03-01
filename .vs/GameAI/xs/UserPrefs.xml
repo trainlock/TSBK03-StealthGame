@@ -1,0 +1,21 @@
+﻿<Properties StartupConfiguration="{EDA8622F-B9B2-B45F-DF6A-B72947CDDEA0}|">
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="Unity.Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Camera.cs">
+    <Files>
+      <File FileName="Assets/Scripts/Player.cs" Line="128" Column="29" />
+      <File FileName="Assets/Scripts/AI/Enemy.cs" Line="20" Column="14" />
+      <File FileName="Assets/Scripts/AI/Patrolling.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/AI/Searching.cs" Line="7" Column="22" />
+      <File FileName="Assets/Scripts/AI/SeekerMovement.cs" Line="10" Column="15" />
+      <File FileName="Assets/Scripts/UIManager.cs" Line="10" Column="14" />
+      <File FileName="Assets/Scripts/GameManager.cs" Line="15" Column="51" />
+      <File FileName="Assets/Scripts/Camera.cs" Line="49" Column="91" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>
