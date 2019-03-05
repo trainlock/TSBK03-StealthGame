@@ -119,16 +119,16 @@ public class InfluenceMap : MonoBehaviour {
 
                 float distToTarget = Vector3.Distance(m_meshPivot.transform.position, worldPos);
                 // Check if the position is within the view radius
-                if(distToTarget < fieldOfView.viewRadius){
+                if(distToTarget < fieldOfView.m_viewRadius){
                     Vector3 directionToPosition = (worldPos - m_meshPivot.transform.position).normalized;
                     directionToPosition.y *= 0;
 
                     // Check if the position is within the view angle
-                    if(Vector3.Angle(m_meshPivot.transform.forward, directionToPosition) < fieldOfView.viewAngle / 2){
+                    if(Vector3.Angle(m_meshPivot.transform.forward, directionToPosition) < fieldOfView.m_viewAngle / 2){
                         // Check if something blocks the line of sight to the position
-                        if(!Physics.Raycast(m_meshPivot.transform.position, directionToPosition, distToTarget, fieldOfView.obstacleMask)){
+                        if(!Physics.Raycast(m_meshPivot.transform.position, directionToPosition, distToTarget, fieldOfView.m_obstacleMask)){
                             // Set the position to a value > 0, where the value decreases with the length from the seeker
-                            m_uneditedInfluenceMap[x, y] = Mathf.Min(m_uneditedInfluenceMap[x, y] + 1.0f - Mathf.Pow(distToTarget / fieldOfView.viewRadius, 2), 1.0f);
+                            m_uneditedInfluenceMap[x, y] = Mathf.Min(m_uneditedInfluenceMap[x, y] + 1.0f - Mathf.Pow(distToTarget / fieldOfView.m_viewRadius, 2), 1.0f);
                         }
                     }
                 }

@@ -28,7 +28,7 @@ public class Searching : MonoBehaviour {
         m_influenceMap = GetComponent<InfluenceMap>();
         m_movement = GetComponent<SeekerMovement>();
         m_fieldOfView = GetComponent<FieldOfView>();
-        m_viewAngle = m_fieldOfView.viewAngle;
+        m_viewAngle = m_fieldOfView.m_viewAngle;
         m_lookAround = 0;
         m_lookRightLeft = 0;
     }
@@ -88,7 +88,6 @@ public class Searching : MonoBehaviour {
     }
 
     public bool LookTowards(){
-        //Debug.Log("SEARCHING: Inside LookTowards");
         // Get rotation vector for left and right direction
         if(!m_isRotationDone){
             m_left = transform.position + Vector3.Cross(transform.forward, transform.up);
@@ -96,35 +95,29 @@ public class Searching : MonoBehaviour {
             m_forward = transform.position + transform.forward;
             m_isRotationDone = true;
         }
-        // TODO: Fix so that not two process are ongoing (this causes two lines to appear, making the rotation caotic)
+        // Look left and right
         switch(m_lookRightLeft){
             case 0: // Look left
-                //Debug.Log("SEARCH NEARBY: before LEFT");
                 if (m_movement.LookInDirection(m_left)){
-                    //Debug.Log("SEARCH NEARBY: LEFT");
                     m_lookRightLeft++;
                 }
                 break;
             case 1: // Look forward
                 if (m_movement.LookInDirection(m_forward)){
-                    //Debug.Log("SEARCH NEARBY: FORWARD 1");
                     m_lookRightLeft++;
                 }
                 break;
             case 2: // Look right
                 if (m_movement.LookInDirection(m_right)){
-                    //Debug.Log("SEARCH NEARBY: RIGHT");
                     m_lookRightLeft++;
                 }
                 break;
             case 3: // Look forward
                 if (m_movement.LookInDirection(m_forward)){
-                    //Debug.Log("SEARCH NEARBY: FORWARD 2");
                     m_lookRightLeft++;
                 }
                 break;
             default: // Finished looking around
-                //Debug.Log("SEARCH NEARBY: Finished looking around");
                 m_lookRightLeft = 0;
                 m_isRotationDone = false;
                 return true;

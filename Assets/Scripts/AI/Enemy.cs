@@ -22,6 +22,7 @@ public class Enemy : MonoBehaviour{
     public float                m_timeToSpotTarget = 0.5f;
 
     // Private
+    private Player              m_player;
     private FieldOfView         m_fieldOfView;
     private Transform           m_target;
     private Transform           m_meshPivot;
@@ -50,7 +51,9 @@ public class Enemy : MonoBehaviour{
         m_fieldOfView = GetComponent<FieldOfView>();
         m_originalSpotlightColor = m_spotlight.color;
         m_movement = GetComponent<SeekerMovement>();
-        m_target = GameObject.FindGameObjectWithTag("Player").transform;
+
+        m_player = FindObjectOfType<Player>();
+        m_target = m_player.transform;
 
         // TODO: Add check to see which child equals to the meshpivot
         m_meshPivot = this.gameObject.transform.GetChild(1);
@@ -130,6 +133,7 @@ public class Enemy : MonoBehaviour{
                     // Check if target is within reach and if the seeker has grasped the target
                     if(Vector3.Distance(transform.position, m_lastSeenTarget) < m_EPSILON){
                         Debug.Log("Caught intruder!");
+                        m_player.SetDiscovered(true);
                     }
 
                     // Check if target has been visible for a long while (= Game Over)

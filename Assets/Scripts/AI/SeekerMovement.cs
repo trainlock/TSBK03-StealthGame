@@ -34,7 +34,7 @@ public class SeekerMovement : MonoBehaviour {
         }
         m_currentNode = m_grid.NodeFromWorldPoint(transform.position);
         m_currentNodePos = transform.position;
-        m_viewRadius = GetComponent<FieldOfView>().viewRadius;
+        m_viewRadius = GetComponent<FieldOfView>().m_viewRadius;
     }
 
     #region Getters and Setters

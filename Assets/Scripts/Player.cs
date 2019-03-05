@@ -7,45 +7,57 @@ public class Player : MonoBehaviour {
     #region Variables
     // Public
     [Header("Movement")]
-    public float            m_MovementSpeed = 10;
-    public float            m_AimSpeedModifier = 0.5f;
-    public float            m_Acceleration = 10;
-    public float            m_SprintModifier = 1.5f;
-    public float            m_JumpSpeed = 5;
-    public float            m_TurnSpeed = 5;
-    public float            m_AirControl = 0.1f;
+    public float            m_movementSpeed = 10;
+    public float            m_aimSpeedModifier = 0.5f;
+    public float            m_acceleration = 10;
+    public float            m_sprintModifier = 1.5f;
+    public float            m_jumpSpeed = 5;
+    public float            m_turnSpeed = 5;
+    public float            m_airControl = 0.1f;
+
+    [Header("Gameplay")]
+    public int              m_maxBooks = 0;
+    public int              m_maxParchments = 0;
 
     //[Header("Camera")]
-    //public Transform        m_Camera;
-    //public float            m_MouseSensitivityX = 1;
-    //public float            m_MouseSensitivityY = 1;
+    //public Transform        m_camera;
+    //public float            m_mouseSensitivityX = 1;
+    //public float            m_mouseSensitivityY = 1;
 
     // Private
-    private Transform       m_Mesh;
-    private Rigidbody       m_Rigidbody;
-    private Vector3         m_InputVec;
-    private Vector3         m_CurrentInputVec;
-    private Vector3         m_CurrentCameraSlotPos;
-    private Vector3         m_DeathCamPos;
-    private bool            m_Grounded;
-    private bool            m_ShouldJump;
-    private float           m_CameraYaw;
-    private float           m_CameraPitch;
+    private Transform       m_mesh;
+    private Rigidbody       m_rigidbody;
+    private Vector3         m_inputVec;
+    private Vector3         m_currentInputVec;
+    private Vector3         m_currentCameraSlotPos;
+    private Vector3         m_deathCamPos;
+    private bool            m_grounded;
+    private bool            m_shouldJump;
+    private bool            m_isDiscovered = false;
+    private float           m_cameraYaw;
+    private float           m_cameraPitch;
+    private int             m_collectedBooks;
+    private int             m_collectedParchments;
     #endregion
 
     // Use this for initialization
     void Start () {
         // Get components
-        m_Rigidbody = GetComponent<Rigidbody>();
+        m_rigidbody = GetComponent<Rigidbody>();
 
         // Find transforms
-        m_Mesh = this.gameObject.transform.GetChild(1);
+        m_mesh = this.gameObject.transform.GetChild(1);
+
+        m_maxBooks = GameObject.FindGameObjectsWithTag("Book").Length;
+        Debug.Log("PLAYER: m_maxBooks = " + m_maxBooks);
     }
     
     // This runs at a variable rate (depends on the framerate)
     void Update () {
         // Update input from the keyboard/mouse
         UpdateInput();
+
+        UpdateUI();
     }
 
     // This runs at a fixed rate (every physics timestep)
@@ -62,22 +74,22 @@ public class Player : MonoBehaviour {
 
     void UpdateInput(){
         // Movement, directional vector implementation
-        m_InputVec = Vector3.zero;
-        m_InputVec += Input.GetKey(KeyCode.W) ?  transform.forward : Vector3.zero;
-        m_InputVec += Input.GetKey(KeyCode.S) ? -transform.forward : Vector3.zero;
-        m_InputVec += Input.GetKey(KeyCode.D) ?  transform.right : Vector3.zero;
-        m_InputVec += Input.GetKey(KeyCode.A) ? -transform.right : Vector3.zero;
+        m_inputVec = Vector3.zero;
+        m_inputVec += Input.GetKey(KeyCode.W) ?  transform.forward : Vector3.zero;
+        m_inputVec += Input.GetKey(KeyCode.S) ? -transform.forward : Vector3.zero;
+        m_inputVec += Input.GetKey(KeyCode.D) ?  transform.right : Vector3.zero;
+        m_inputVec += Input.GetKey(KeyCode.A) ? -transform.right : Vector3.zero;
 
         // Camera-relative input
         //m_InputVec = m_Camera.rotation * m_InputVec;
         //m_InputVec.y = 0; // The camera rotation might give us some movement in the y-direction (up/down) so we want to remove that
 
         // Normalize input vector so movement speed is the same in all directions
-        m_InputVec.Normalize();
+        m_inputVec.Normalize();
 
         // If we are moving, turn the mesh to face towards the moving direction
-        if (m_InputVec.magnitude > Mathf.Epsilon){
-            m_Mesh.rotation = Quaternion.Slerp(m_Mesh.rotation, Quaternion.LookRotation(m_InputVec), Time.deltaTime * m_TurnSpeed);
+        if (m_inputVec.magnitude > Mathf.Epsilon){
+            m_mesh.rotation = Quaternion.Slerp(m_mesh.rotation, Quaternion.LookRotation(m_inputVec), Time.deltaTime * m_turnSpeed);
         }
 
         //Debug.Log("Space pressed = " + Input.GetKeyDown(KeyCode.Space));
@@ -90,33 +102,42 @@ public class Player : MonoBehaviour {
         // Add Player controlled camera movement
     }
 
+
+    void UpdateUI(){
+        // Update the book counter
+        UIManager.manager.SetCollectedBooks((float)m_collectedBooks, (float)m_maxBooks);
+
+        // Update the parchment counter
+        UIManager.manager.SetCollectedParchments((float)m_collectedParchments, (float)m_maxParchments);
+    }
+
     void UpdateMovement(){
         // Move the player by pushing the rigidbody (XZ only)
         if(transform.position.y < 0.0001f){
-            m_Grounded = true;
+            m_grounded = true;
         }
 
         // Smooth (lerp) the input vector, giving us some acceleration/deceleration
-        m_CurrentInputVec = Vector3.Lerp(m_CurrentInputVec, m_InputVec, m_Acceleration * Time.fixedDeltaTime);
+        m_currentInputVec = Vector3.Lerp(m_currentInputVec, m_inputVec, m_acceleration * Time.fixedDeltaTime);
 
         // Because the members of Rigidbody.velocity cannot be modified individually, we obtain a copy, modify it, and then assign it back
-        Vector3 currentVelocity = m_Rigidbody.velocity;
-        Vector3 inputVelocity = m_CurrentInputVec * m_MovementSpeed; // Calculate input velocity based on the input vector and movement speed
+        Vector3 currentVelocity = m_rigidbody.velocity;
+        Vector3 inputVelocity = m_currentInputVec * m_movementSpeed; // Calculate input velocity based on the input vector and movement speed
         Debug.DrawRay(transform.position, transform.forward * 5.0f, Color.blue);
 
         // On the ground
-        if (m_Grounded) {
+        if (m_grounded) {
             // This will override the existing velocity, giving us absolute control of player movement on the ground
             currentVelocity.x = inputVelocity.x;
             currentVelocity.z = inputVelocity.z;
         }
         // In the air, IF the player is moving
-        else if (m_InputVec.magnitude > Mathf.Epsilon && m_AirControl > Mathf.Epsilon) {
+        else if (m_inputVec.magnitude > Mathf.Epsilon && m_airControl > Mathf.Epsilon) {
             // This will give us some amount of control in the air, but will not override the existing velocity 
-            currentVelocity.x = Mathf.Lerp(currentVelocity.x, inputVelocity.x, m_AirControl);
-            currentVelocity.z = Mathf.Lerp(currentVelocity.z, inputVelocity.z, m_AirControl);
+            currentVelocity.x = Mathf.Lerp(currentVelocity.x, inputVelocity.x, m_airControl);
+            currentVelocity.z = Mathf.Lerp(currentVelocity.z, inputVelocity.z, m_airControl);
         }
-        else if(!m_Grounded){
+        else if(!m_grounded){
             //currentVelocity -= 9.82f;
         }
 
@@ -128,20 +149,49 @@ public class Player : MonoBehaviour {
         // TODO: Add gravity
 
         // Jump by applying some velocity straight upwards
-        if (m_ShouldJump){
+        if (m_shouldJump){
             Debug.Log("Jumping");
             //m_Rigidbody.velocity += Vector3.up * m_JumpSpeed;
             //transform.position += Vector3.up * m_JumpSpeed;// * Time.deltaTime;
-            m_ShouldJump = false;
-            m_Grounded = false;
+            m_shouldJump = false;
+            m_grounded = false;
         }
     }
 
     void OnTriggerEnter(Collider other){
-        m_Grounded = true;
+        m_grounded = true;
+    }
 
-        //if (other.gameObject.CompareTag("Pick Up")){
-        //    other.gameObject.SetActive(false);
-        //}
+    public void SetDiscovered(bool status){
+        m_isDiscovered = status;
+    }
+
+    public bool IsDiscovered(){
+        return m_isDiscovered;
+    }
+
+    // Add book to count
+    // Returns true if book is added, else false
+    public bool AddBook(int count){
+        // All books are collected (Part of win condition though...)
+        if(m_collectedBooks >= m_maxBooks){
+            return false;
+        }
+        m_collectedBooks = Mathf.Min(m_collectedBooks + count, m_maxBooks); // Make sure to not add more books than is allowed
+        Debug.Log("PLAYER: Collected Books  = " + m_collectedBooks);
+        //GameManager.manager.PickupCollected(); // Returns null
+        return true;
+    }
+
+    // Add parchment to count
+    // Returns true if parchment is added, else false
+    public bool AddParchment(int count){
+        // All books are collected (Part of win condition though...)
+        if (m_collectedParchments >= m_maxParchments){
+            return false;
+        }
+        m_collectedParchments = Mathf.Min(m_collectedParchments + count, m_maxParchments); // Make sure to not add more parchments than is allowed
+        //GameManager.manager.PickupCollected();
+        return true;
     }
 }

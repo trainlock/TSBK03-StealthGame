@@ -6,19 +6,25 @@ public class FieldOfView : MonoBehaviour{
 
     #region Variables
     [Range(0, 360)]
-    public float                viewAngle;
-    public float                viewRadius;
+    public float                m_viewAngle;
+    public float                m_viewRadius;
 
-    public LayerMask            targetMask;
-    public LayerMask            obstacleMask;
+    public LayerMask            m_targetMask;
+    public LayerMask            m_obstacleMask;
 
     [HideInInspector]
     public List<Transform>      m_visibleTargets = new List<Transform>();
 
+    private Transform           m_mesh;
     private Vector3             m_lookDir;
     #endregion
 
     void Start(){
+        //m_mesh = gameObject.transform.GetChild(1);
+        m_mesh = gameObject.transform.Find("MeshPivot");
+        if(!m_mesh){
+            Debug.Log("FOV: Start: Mesh is NOT null");
+        }
         StartCoroutine("FindTargetsWithDelay", 0.2f);
     }
 
@@ -42,20 +48,20 @@ public class FieldOfView : MonoBehaviour{
     public bool FindVisibleTargets(){
         // Clear list of targets
         m_visibleTargets.Clear();
-        Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, viewRadius, targetMask);
+        Collider[] targetsInViewRadius = Physics.OverlapSphere(m_mesh.transform.position, m_viewRadius, m_targetMask);
 
         // Loop through all targets
         for (int i = 0; i < targetsInViewRadius.Length; i++){
             Transform target = targetsInViewRadius[i].transform;
-            Vector3 directionToTarget = (target.position - transform.position).normalized;
+            Vector3 directionToTarget = (target.position - m_mesh.transform.position).normalized;
             directionToTarget.y *= 0;
 
             // Check if target is within our view angle
-            if (Vector3.Angle(m_lookDir, directionToTarget) < viewAngle / 2){
-                float distToTarget = Vector3.Distance(transform.position, target.position);
+            if (Vector3.Angle(m_lookDir, directionToTarget) < m_viewAngle / 2){
+                float distToTarget = Vector3.Distance(m_mesh.transform.position, target.position);
 
                 // Check if something blocks the line of sight to the target
-                if (!Physics.Raycast(transform.position, directionToTarget, distToTarget, obstacleMask)){
+                if (!Physics.Raycast(m_mesh.transform.position, directionToTarget, distToTarget, m_obstacleMask)){
                     m_visibleTargets.Add(target);
                     return true;
                 }
@@ -65,9 +71,13 @@ public class FieldOfView : MonoBehaviour{
     }
 
     public Vector3 DirectionFromAngle(float angleInDegrees, bool angleIsGlobal){
-        // Check if angle is global ,if not convert angle to global
+        var m_meshPivot = gameObject.transform.Find("MeshPivot");
+        if(!m_meshPivot){
+            Debug.Log("FOV: MeshPivot is NOT found");
+        }
+        // Check if angle is global, if not convert angle to global
         if (!angleIsGlobal){
-            angleInDegrees += transform.eulerAngles.y;
+            angleInDegrees += m_meshPivot.transform.eulerAngles.y;
         }
         return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0, Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
     }
