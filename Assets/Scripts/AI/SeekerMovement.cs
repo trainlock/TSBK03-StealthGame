@@ -99,11 +99,22 @@ public class SeekerMovement : MonoBehaviour {
         List<Node> path = m_pathfinding.GetPath();
 
         if(path == null){
+            Debug.Log("MOV: Path is null!");
             if(targetPos == null){
                 return false;
             }
             // Get a new path
             path = m_pathfinding.GetPath();
+            Debug.Log("MOV: New path found? NULL");
+        }
+
+        if(path.Count == 0){
+            Debug.Log("MOV: Path == 0");
+            if(targetPos == null){
+                return false;
+            }
+            path = m_pathfinding.GetPath();
+            Debug.Log("MOV: New path found? == 0");
         }
 
         // At the end of the path

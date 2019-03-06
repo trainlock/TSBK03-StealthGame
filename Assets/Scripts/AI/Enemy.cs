@@ -17,6 +17,8 @@ public class Enemy : MonoBehaviour{
     #endregion
 
     #region Variables
+    public GameObject           m_gameManager;
+
     // Public
     public Light                m_spotlight;
     public float                m_timeToSpotTarget = 0.5f;
@@ -41,12 +43,23 @@ public class Enemy : MonoBehaviour{
     private int                 m_lookRightLeft;
     private bool                m_isRotationDone = false;
     private bool                m_isSearchingNearby = false;
+    private bool                m_discovered = false;
+    private bool                m_disabled = false;
 
     private static float        m_EPSILON = 0.01f;
     #endregion
 
+    public void SetDisabled(){
+        m_disabled = !m_disabled;
+    }
+
     void Start(){
         Debug.Log("ENEMY: Start");
+        // Instantiate gameManager prefab
+        if (GameManager.manager == null){
+            Instantiate(m_gameManager);
+        }
+
         m_currentState = (int)State.Searching; // Searches by default
         m_fieldOfView = GetComponent<FieldOfView>();
         m_originalSpotlightColor = m_spotlight.color;
@@ -61,6 +74,10 @@ public class Enemy : MonoBehaviour{
 
     // Can have a day and night behaviour and state
     void Update(){
+        if(m_discovered || m_disabled){
+            return;
+        }
+
         DisplayCurrentState();
         m_fieldOfView.SetLookDir(transform.forward);
         bool hasVisibleTarget = m_fieldOfView.FindVisibleTargets();
@@ -130,10 +147,13 @@ public class Enemy : MonoBehaviour{
                     // Set viewing direction
                     transform.rotation = Quaternion.LookRotation(m_movement.GetMoveDir());
 
+                    Debug.Log("ENEMY: Distance seeker to target = " + Vector3.Distance(transform.position, m_lastSeenTarget));
                     // Check if target is within reach and if the seeker has grasped the target
-                    if(Vector3.Distance(transform.position, m_lastSeenTarget) < m_EPSILON){
+                    if(Vector3.Distance(transform.position, m_lastSeenTarget) < 2.0f){
                         Debug.Log("Caught intruder!");
-                        m_player.SetDiscovered(true);
+                        m_discovered = true;
+                        m_player.SetDiscovered(m_discovered);
+                        GameManager.manager.Discovered();
                     }
 
                     // Check if target has been visible for a long while (= Game Over)

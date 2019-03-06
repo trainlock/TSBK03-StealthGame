@@ -6,13 +6,14 @@ using UnityEngine.SceneManagement; // Needed to reload the scene
 public class GameManager : MonoBehaviour {
 
     #region Variables
-    public static GameManager   manager;
+    public static GameManager   manager = null;
 
     // Public
     public int                  m_totalCollectiblesCount = 3;
 
     // Private
     private Player              m_player;
+    private Enemy               m_seeker;
     private int                 m_currentPickupCount = 0;
     private bool                m_gameWon = false;
     private bool                m_isDiscovered = false;
@@ -27,20 +28,29 @@ public class GameManager : MonoBehaviour {
 
         // Get a reference to the player
         m_player = FindObjectOfType<Player>();
+        // Get a reference to the seeker
+        m_seeker = FindObjectOfType<Enemy>();
+
         int maxBooks = GameObject.FindGameObjectsWithTag("Book").Length;
-        int maxParchment = GameObject.FindGameObjectsWithTag("Parchment").Length;
+        int maxParchment = 0;//GameObject.FindGameObjectsWithTag("Parchment").Length;
         Debug.Log("GAME MANAGER: Total pickup count = " + m_currentPickupCount);
         m_currentPickupCount = maxBooks + maxParchment;
 	}
 
     // TODO: Add win and lose condition!
     void Update(){
-        Debug.Log("GM: isdiscovered? " + m_player.IsDiscovered() + ", is game won? " + m_gameWon);
+        //Debug.Log("GM: isdiscovered? " + m_player.IsDiscovered() + ", is game won? " + m_gameWon);
         // Check if the game should be restarted
         if((!m_player.IsDiscovered() || m_gameWon) && Input.GetKeyDown(KeyCode.R)){
             // Reload the scene by telling the SceneManager to load the current (active) scene
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
+    }
+
+    public void Discovered(){
+        UIManager.manager.GameLost();
+        m_player.SetDisabled();
+        m_seeker.SetDisabled();
     }
 
     // Call this if the player has been discovered
@@ -49,8 +59,10 @@ public class GameManager : MonoBehaviour {
         Debug.Log("GM: Pickup collected, currently left pickups are " + m_currentPickupCount);
 
         // Check if the game is won
-        if(!IsGameWon() && !m_gameWon){
+        if(IsGameWon() && !m_gameWon){
             UIManager.manager.GameWon();
+            m_player.SetDisabled();
+            m_seeker.SetDisabled();
             m_gameWon = true;
         }
     }

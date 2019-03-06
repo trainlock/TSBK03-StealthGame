@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour {
 
     #region Variables
-    public static UIManager manager;
+    public static UIManager manager = null;
 
     // Public
     //public RectTransform    m_bookCount;

@@ -78,7 +78,6 @@ public class InfluenceMap : MonoBehaviour {
                 }
             }
         }
-
         // Display the minimap of the influence map
         DisplayInfluenceMap(m_uneditedInfluenceMap);
 	}
@@ -145,6 +144,7 @@ public class InfluenceMap : MonoBehaviour {
         }
     }
 
+    // Lowpass-filter the image
     void LowPassFilter(float[,] inMap, float[,] outMap){
         float noiseSmoothing = 1.0f / 8.0f;
         float centerValue = 0.0f, crossValue = 0.0f, cornerValue = 0.0f;

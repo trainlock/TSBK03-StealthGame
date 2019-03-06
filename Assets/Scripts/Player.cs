@@ -5,6 +5,8 @@ using UnityEngine;
 public class Player : MonoBehaviour {
 
     #region Variables
+    public GameObject       m_gameManager; 
+
     // Public
     [Header("Movement")]
     public float            m_movementSpeed = 10;
@@ -34,14 +36,24 @@ public class Player : MonoBehaviour {
     private bool            m_grounded;
     private bool            m_shouldJump;
     private bool            m_isDiscovered = false;
+    private bool            m_disabled = false;
     private float           m_cameraYaw;
     private float           m_cameraPitch;
     private int             m_collectedBooks;
     private int             m_collectedParchments;
     #endregion
 
+    public void SetDisabled(){
+        m_disabled = !m_disabled;
+    }
+
     // Use this for initialization
     void Start () {
+        // Instantiate gameManager prefab
+        if (GameManager.manager == null){
+            Instantiate(m_gameManager);
+        }
+
         // Get components
         m_rigidbody = GetComponent<Rigidbody>();
 
@@ -54,16 +66,20 @@ public class Player : MonoBehaviour {
     
     // This runs at a variable rate (depends on the framerate)
     void Update () {
-        // Update input from the keyboard/mouse
-        UpdateInput();
+        if(!m_disabled){
+            // Update input from the keyboard/mouse
+            UpdateInput();
+        }
 
         UpdateUI();
     }
 
     // This runs at a fixed rate (every physics timestep)
     void FixedUpdate(){
-        // Update the movement of the player. Since this involves physics, we run it in FixedUpdate
-        UpdateMovement();
+        if (!m_disabled){
+            // Update the movement of the player. Since this involves physics, we run it in FixedUpdate
+            UpdateMovement();
+        }
     }
 
     // This runs at a variable rate (depends on the framerate), but at the very end of the frame
@@ -179,7 +195,7 @@ public class Player : MonoBehaviour {
         }
         m_collectedBooks = Mathf.Min(m_collectedBooks + count, m_maxBooks); // Make sure to not add more books than is allowed
         Debug.Log("PLAYER: Collected Books  = " + m_collectedBooks);
-        //GameManager.manager.PickupCollected(); // Returns null
+        GameManager.manager.PickupCollected(); // Returns null
         return true;
     }
 
